@@ -845,6 +845,7 @@ installTLS() {
 		fi
 	elif [[ -d "$HOME/.acme.sh" ]] && [[ ! -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.cer" || ! -f "$HOME/.acme.sh/${tlsDomain}_ecc/${tlsDomain}.key" ]]; then
 		echoContent green " ---> Install TLS certificate"
+		sudo pkill -f nginx & wait $!
 		if [[ -n "${pingIPv6}" ]]; then
 			sudo "$HOME/.acme.sh/acme.sh" --issue -d "${tlsDomain}" --standalone -k ec-256 --server letsencrypt --listen-v6 >> /etc/v2ray-agent/tls/acme.log
 		else
@@ -868,8 +869,10 @@ installTLS() {
 			installTLS "$1"
 		fi
 		echoContent green " ---> TLS generation success"
+		sudo systemctl start nginx
 	else
 		echoContent yellow " ---> No acme is installed"
+		sudo systemctl start nginx
 		exit 0
 	fi
 }
@@ -4259,4 +4262,3 @@ menu() {
 }
 cronRenewTLS
 menu
-
